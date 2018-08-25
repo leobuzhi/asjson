@@ -18,6 +18,7 @@ const (
 )
 
 type AsjsonValue struct {
+	N   float64
 	Typ AsjsonType
 }
 

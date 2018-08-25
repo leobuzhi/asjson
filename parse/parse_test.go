@@ -52,10 +52,16 @@ func Test_Parse(t *testing.T) {
 			model.AsjsonNULL,
 			model.ParseOK,
 		},
+		{
+			"\r\n\t  null  abc",
+			model.AsjsonNAT,
+			model.ParseRootNotSingular,
+		},
 	}
 	for _, tc := range tcs {
-		typ, err := Parse(tc.json)
-		assert.Equal(t, tc.typ, typ)
+		var av model.AsjsonValue
+		err := Parse(tc.json, &av)
+		assert.Equal(t, tc.typ, av.Typ)
 		assert.Equal(t, tc.err, err)
 	}
 
@@ -85,8 +91,9 @@ func Test_parseNull(t *testing.T) {
 	}
 
 	for _, tc := range tcs {
-		typ, err := parseNull(tc.ac)
-		assert.Equal(t, tc.typ, typ)
+		var av model.AsjsonValue
+		err := parseNull(tc.ac, &av)
+		assert.Equal(t, tc.typ, av.Typ)
 		assert.Equal(t, tc.err, err)
 	}
 }
@@ -120,8 +127,9 @@ func Test_parseTrue(t *testing.T) {
 	}
 
 	for _, tc := range tcs {
-		typ, err := parseTrue(tc.ac)
-		assert.Equal(t, tc.typ, typ)
+		var av model.AsjsonValue
+		err := parseTrue(tc.ac, &av)
+		assert.Equal(t, tc.typ, av.Typ)
 		assert.Equal(t, tc.err, err)
 	}
 }
@@ -160,58 +168,239 @@ func Test_parseFalse(t *testing.T) {
 	}
 
 	for _, tc := range tcs {
-		typ, err := parseFalse(tc.ac)
-		assert.Equal(t, tc.typ, typ)
+		var av model.AsjsonValue
+		err := parseFalse(tc.ac, &av)
+		assert.Equal(t, tc.typ, av.Typ)
+		assert.Equal(t, tc.err, err)
+	}
+}
+
+func Test_parseNumber(t *testing.T) {
+	tcs := []struct {
+		ac  *model.AsjsonContext
+		typ model.AsjsonType
+		n   float64
+		err error
+	}{
+		{
+			&model.AsjsonContext{JSON: "0.0"},
+			model.AsjsonNumber,
+			0,
+			model.ParseOK,
+		},
+		{
+			&model.AsjsonContext{JSON: "-0"},
+			model.AsjsonNumber,
+			0,
+			model.ParseOK,
+		},
+		{
+			&model.AsjsonContext{JSON: "-0.0"},
+			model.AsjsonNumber,
+			0,
+			model.ParseOK,
+		},
+		{
+			&model.AsjsonContext{JSON: "1"},
+			model.AsjsonNumber,
+			1.0,
+			model.ParseOK,
+		},
+		{
+			&model.AsjsonContext{JSON: "-1"},
+			model.AsjsonNumber,
+			-1.0,
+			model.ParseOK,
+		},
+		{
+			&model.AsjsonContext{JSON: "3.1416"},
+			model.AsjsonNumber,
+			3.1416,
+			model.ParseOK,
+		},
+		{
+			&model.AsjsonContext{JSON: "1E10"},
+			model.AsjsonNumber,
+			1E10,
+			model.ParseOK,
+		},
+		{
+			&model.AsjsonContext{JSON: "1e10"},
+			model.AsjsonNumber,
+			1e10,
+			model.ParseOK,
+		},
+		{
+			&model.AsjsonContext{JSON: "1E+10"},
+			model.AsjsonNumber,
+			1E+10,
+			model.ParseOK,
+		},
+		{
+			&model.AsjsonContext{JSON: "-1E10"},
+			model.AsjsonNumber,
+			-1E10,
+			model.ParseOK,
+		},
+		{
+			&model.AsjsonContext{JSON: "-1E10"},
+			model.AsjsonNumber,
+			-1E10,
+			model.ParseOK,
+		},
+		{
+			&model.AsjsonContext{JSON: "-1e10"},
+			model.AsjsonNumber,
+			-1e10,
+			model.ParseOK,
+		},
+		{
+			&model.AsjsonContext{JSON: "-1E+10"},
+			model.AsjsonNumber,
+			-1E+10,
+			model.ParseOK,
+		},
+		{
+			&model.AsjsonContext{JSON: "-1E-10"},
+			model.AsjsonNumber,
+			-1E-10,
+			model.ParseOK,
+		},
+		{
+			&model.AsjsonContext{JSON: "1.234E+10"},
+			model.AsjsonNumber,
+			1.234E+10,
+			model.ParseOK,
+		},
+		{
+			&model.AsjsonContext{JSON: "1.234E-10"},
+			model.AsjsonNumber,
+			1.234E-10,
+			model.ParseOK,
+		},
+		{
+			//note(joey.chen): underflow
+			&model.AsjsonContext{JSON: "1e-10000"},
+			model.AsjsonNumber,
+			0.0,
+			model.ParseOK,
+		},
+		{
+			&model.AsjsonContext{JSON: "+0"},
+			model.AsjsonNAT,
+			0.0,
+			model.ParseInvalidValue,
+		},
+		{
+			&model.AsjsonContext{JSON: "+1"},
+			model.AsjsonNAT,
+			0.0,
+			model.ParseInvalidValue,
+		},
+		{
+			&model.AsjsonContext{JSON: ".123"},
+			model.AsjsonNAT,
+			0.0,
+			model.ParseInvalidValue,
+		},
+		{
+			&model.AsjsonContext{JSON: "1."},
+			model.AsjsonNAT,
+			0.0,
+			model.ParseInvalidValue,
+		},
+		{
+			&model.AsjsonContext{JSON: "INF"},
+			model.AsjsonNAT,
+			0.0,
+			model.ParseInvalidValue,
+		},
+		{
+			&model.AsjsonContext{JSON: "inf"},
+			model.AsjsonNAT,
+			0.0,
+			model.ParseInvalidValue,
+		},
+		{
+			&model.AsjsonContext{JSON: "NAN"},
+			model.AsjsonNAT,
+			0.0,
+			model.ParseInvalidValue,
+		},
+		{
+			&model.AsjsonContext{JSON: "nan"},
+			model.AsjsonNAT,
+			0.0,
+			model.ParseInvalidValue,
+		},
+	}
+	for _, tc := range tcs {
+		var av model.AsjsonValue
+		err := parseNumber(tc.ac, &av)
+		assert.Equal(t, tc.typ, av.Typ)
+		assert.Equal(t, tc.n, av.N)
 		assert.Equal(t, tc.err, err)
 	}
 }
 
 func Test_parseValue(t *testing.T) {
 	tcs := []struct {
-		json string
-		typ  model.AsjsonType
-		err  error
+		ac  *model.AsjsonContext
+		av  model.AsjsonValue
+		err error
 	}{
 		{
-			"",
-			model.AsjsonNAT,
+			&model.AsjsonContext{JSON: ""},
+			model.AsjsonValue{N: 0, Typ: model.AsjsonNAT},
 			model.ParseExpectValue,
 		},
 		{
-			"n",
-			model.AsjsonNAT,
+			&model.AsjsonContext{JSON: "n"},
+			model.AsjsonValue{N: 0, Typ: model.AsjsonNAT},
 			model.ParseInvalidValue,
 		},
 		{
-			"null",
-			model.AsjsonNULL,
+			&model.AsjsonContext{JSON: "null"},
+			model.AsjsonValue{N: 0, Typ: model.AsjsonNULL},
 			model.ParseOK,
 		},
 		{
-			"abc",
-			model.AsjsonNAT,
+			&model.AsjsonContext{JSON: "abc"},
+			model.AsjsonValue{N: 0, Typ: model.AsjsonNAT},
 			model.ParseInvalidValue,
 		},
 		{
-			"true",
-			model.AsjsonTrue,
+			&model.AsjsonContext{JSON: "true"},
+			model.AsjsonValue{N: 0, Typ: model.AsjsonTrue},
 			model.ParseOK,
 		},
 		{
-			"false",
-			model.AsjsonFalse,
+			&model.AsjsonContext{JSON: "false"},
+			model.AsjsonValue{N: 0, Typ: model.AsjsonFalse},
 			model.ParseOK,
 		},
 		{
-			"fa",
-			model.AsjsonNAT,
+			&model.AsjsonContext{JSON: "fa"},
+			model.AsjsonValue{N: 0, Typ: model.AsjsonNAT},
+			model.ParseInvalidValue,
+		},
+		{
+			&model.AsjsonContext{JSON: "1.2"},
+			model.AsjsonValue{N: 1.2, Typ: model.AsjsonNumber},
+			model.ParseOK,
+		},
+		{
+			&model.AsjsonContext{JSON: "+1.2"},
+			model.AsjsonValue{N: 0, Typ: model.AsjsonNAT},
 			model.ParseInvalidValue,
 		},
 	}
 
 	for _, tc := range tcs {
-		typ, err := parseValue(&model.AsjsonContext{JSON: tc.json})
-		assert.Equal(t, tc.typ, typ)
+		var av model.AsjsonValue
+		err := parseValue(tc.ac, &av)
+		assert.Equal(t, tc.av.Typ, av.Typ)
+		assert.Equal(t, tc.av.N, av.N)
 		assert.Equal(t, tc.err, err)
 	}
 }
