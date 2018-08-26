@@ -1,4 +1,4 @@
-package parse
+package parser
 
 import (
 	"github.com/leobuzhi/asjson/model"
@@ -11,6 +11,9 @@ func Parse(json string, av *model.AsjsonValue) error {
 	ac.JSON = json
 	parseWhitespace(&ac)
 	err := parseValue(&ac, av)
+	if err != nil {
+		return err
+	}
 	parseWhitespace(&ac)
 	if len(ac.JSON) > 0 {
 		av.Typ = model.AsjsonNAT
@@ -33,7 +36,6 @@ func parseWhitespace(ac *model.AsjsonContext) {
 
 func parseNull(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 	if len(ac.JSON) < 4 || ac.JSON[0:4] != "null" {
-		av.Typ = model.AsjsonNAT
 		return model.ParseInvalidValue
 	}
 	ac.JSON = ac.JSON[4:]
@@ -43,7 +45,6 @@ func parseNull(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 
 func parseTrue(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 	if len(ac.JSON) < 4 || ac.JSON[0:4] != "true" {
-		av.Typ = model.AsjsonNAT
 		return model.ParseInvalidValue
 	}
 	ac.JSON = ac.JSON[4:]
@@ -53,7 +54,6 @@ func parseTrue(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 
 func parseFalse(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 	if len(ac.JSON) < 5 || ac.JSON[0:5] != "false" {
-		av.Typ = model.AsjsonNAT
 		return model.ParseInvalidValue
 	}
 	ac.JSON = ac.JSON[5:]
@@ -63,19 +63,16 @@ func parseFalse(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 
 func parseNumber(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 	if len(ac.JSON) == 0 || ac.JSON[0] == '+' || ac.JSON[0] == '.' || ac.JSON[len(ac.JSON)-1] == '.' {
-		av.Typ = model.AsjsonNAT
 		return model.ParseInvalidValue
 	}
 	if len(ac.JSON) == 3 {
 		invalidNum := strings.ToLower(ac.JSON)
 		if invalidNum == "inf" || invalidNum == "nan" {
-			av.Typ = model.AsjsonNAT
 			return model.ParseInvalidValue
 		}
 	}
 	n, err := strconv.ParseFloat(ac.JSON, 64)
 	if err != nil {
-		av.Typ = model.AsjsonNAT
 		return model.ParseInvalidValue
 	}
 	av.Typ = model.AsjsonNumber
@@ -83,9 +80,18 @@ func parseNumber(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 	return model.ParseOK
 }
 
+func parseString(ac *model.AsjsonContext, av *model.AsjsonValue) error {
+	slen := len(ac.JSON)
+	if slen < 2 || ac.JSON[slen-1] != '"' {
+		return model.ParseMissQuotationMark
+	}
+	av.S = ac.JSON[1 : slen-1]
+	av.Typ = model.AsjsonString
+	return model.ParseOK
+}
+
 func parseValue(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 	if len(ac.JSON) == 0 {
-		av.Typ = model.AsjsonNAT
 		return model.ParseExpectValue
 	}
 	switch ac.JSON[0] {
@@ -95,6 +101,8 @@ func parseValue(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 		return parseTrue(ac, av)
 	case 'f':
 		return parseFalse(ac, av)
+	case '"':
+		return parseString(ac, av)
 	default:
 		return parseNumber(ac, av)
 	}

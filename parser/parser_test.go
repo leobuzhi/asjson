@@ -1,4 +1,4 @@
-package parse
+package parser
 
 import (
 	"github.com/leobuzhi/asjson/model"
@@ -56,6 +56,11 @@ func Test_Parse(t *testing.T) {
 			"\r\n\t  null  abc",
 			model.AsjsonNAT,
 			model.ParseRootNotSingular,
+		},
+		{
+			`"`,
+			model.AsjsonNAT,
+			model.ParseMissQuotationMark,
 		},
 	}
 	for _, tc := range tcs {
@@ -333,12 +338,113 @@ func Test_parseNumber(t *testing.T) {
 			0.0,
 			model.ParseInvalidValue,
 		},
+		{
+			&model.AsjsonContext{JSON: "1E012"},
+			model.AsjsonNumber,
+			1E012,
+			model.ParseOK,
+		},
+		{
+			&model.AsjsonContext{JSON: "1.0000000000000002"},
+			model.AsjsonNumber,
+			1.0000000000000002,
+			model.ParseOK,
+		},
+		{
+			&model.AsjsonContext{JSON: "4.9406564584124654e-324"},
+			model.AsjsonNumber,
+			4.9406564584124654e-324,
+			model.ParseOK,
+		},
+		{
+			&model.AsjsonContext{JSON: "-4.9406564584124654e-324"},
+			model.AsjsonNumber,
+			-4.9406564584124654e-324,
+			model.ParseOK,
+		},
+		{
+			&model.AsjsonContext{JSON: "2.2250738585072009e-308"},
+			model.AsjsonNumber,
+			2.2250738585072009e-308,
+			model.ParseOK,
+		},
+		{
+			&model.AsjsonContext{JSON: "-2.2250738585072009e-308"},
+			model.AsjsonNumber,
+			-2.2250738585072009e-308,
+			model.ParseOK,
+		},
+		{
+			&model.AsjsonContext{JSON: "2.2250738585072014e-308"},
+			model.AsjsonNumber,
+			2.2250738585072014e-308,
+			model.ParseOK,
+		},
+		{
+			&model.AsjsonContext{JSON: "-2.2250738585072014e-308"},
+			model.AsjsonNumber,
+			-2.2250738585072014e-308,
+			model.ParseOK,
+		},
+		{
+			&model.AsjsonContext{JSON: "1.7976931348623157e+308"},
+			model.AsjsonNumber,
+			1.7976931348623157e+308,
+			model.ParseOK,
+		},
+		{
+			&model.AsjsonContext{JSON: "-1.7976931348623157e+308"},
+			model.AsjsonNumber,
+			-1.7976931348623157e+308,
+			model.ParseOK,
+		},
 	}
 	for _, tc := range tcs {
 		var av model.AsjsonValue
 		err := parseNumber(tc.ac, &av)
 		assert.Equal(t, tc.typ, av.Typ)
 		assert.Equal(t, tc.n, av.N)
+		assert.Equal(t, tc.err, err)
+	}
+}
+
+func Test_parseString(t *testing.T) {
+	tcs := []struct {
+		ac  *model.AsjsonContext
+		typ model.AsjsonType
+		s   string
+		err error
+	}{
+		{
+			&model.AsjsonContext{JSON: `"abc"`},
+			model.AsjsonString,
+			`abc`,
+			model.ParseOK,
+		},
+		{
+			&model.AsjsonContext{JSON: `""`},
+			model.AsjsonString,
+			``,
+			model.ParseOK,
+		},
+		{
+			&model.AsjsonContext{JSON: `"123"`},
+			model.AsjsonString,
+			`123`,
+			model.ParseOK,
+		},
+		{
+			&model.AsjsonContext{JSON: `"`},
+			model.AsjsonNAT,
+			``,
+			model.ParseMissQuotationMark,
+		},
+	}
+	for _, tc := range tcs {
+		var av model.AsjsonValue
+		err := parseString(tc.ac, &av)
+		assert.Equal(t, tc.typ, av.Typ)
+		assert.Equal(t, tc.s, av.S)
 		assert.Equal(t, tc.err, err)
 	}
 }

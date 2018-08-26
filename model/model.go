@@ -19,6 +19,7 @@ const (
 
 type AsjsonValue struct {
 	N   float64
+	S   string
 	Typ AsjsonType
 }
 
@@ -27,8 +28,9 @@ type AsjsonContext struct {
 }
 
 var (
-	ParseOK              error
-	ParseExpectValue     = fmt.Errorf("expect value")
-	ParseInvalidValue    = fmt.Errorf("invalid value")
-	ParseRootNotSingular = fmt.Errorf("root not singular")
+	ParseOK                error
+	ParseExpectValue       = fmt.Errorf("expect value")
+	ParseInvalidValue      = fmt.Errorf("invalid value")
+	ParseRootNotSingular   = fmt.Errorf("root not singular")
+	ParseMissQuotationMark = fmt.Errorf("miss quotation mark")
 )
