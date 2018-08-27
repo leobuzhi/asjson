@@ -58,7 +58,7 @@ func Test_Parse(t *testing.T) {
 			model.ParseRootNotSingular,
 		},
 		{
-			`"`,
+			"\"",
 			model.AsjsonNAT,
 			model.ParseMissQuotationMark,
 		},
@@ -416,9 +416,9 @@ func Test_parseString(t *testing.T) {
 		err error
 	}{
 		{
-			&model.AsjsonContext{JSON: `"abc"`},
+			&model.AsjsonContext{JSON: "\"abc\""},
 			model.AsjsonString,
-			`abc`,
+			"abc",
 			model.ParseOK,
 		},
 		{
@@ -438,6 +438,24 @@ func Test_parseString(t *testing.T) {
 			model.AsjsonNAT,
 			``,
 			model.ParseMissQuotationMark,
+		},
+		{
+			&model.AsjsonContext{JSON: "\"\""},
+			model.AsjsonString,
+			"",
+			model.ParseOK,
+		},
+		{
+			&model.AsjsonContext{JSON: "\"Hello\""},
+			model.AsjsonString,
+			"Hello",
+			model.ParseOK,
+		},
+		{
+			&model.AsjsonContext{JSON: "\"Hello\nWorld\""},
+			model.AsjsonString,
+			"Hello\nWorld",
+			model.ParseOK,
 		},
 	}
 	for _, tc := range tcs {
