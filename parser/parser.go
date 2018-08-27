@@ -1,9 +1,10 @@
 package parser
 
 import (
-	"github.com/leobuzhi/asjson/model"
 	"strconv"
 	"strings"
+
+	"github.com/leobuzhi/asjson/model"
 )
 
 func Parse(json string, av *model.AsjsonValue) error {
@@ -82,7 +83,8 @@ func parseNumber(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 
 func parseString(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 	slen := len(ac.JSON)
-	if slen < 2 || ac.JSON[slen-1] != '"' {
+
+	if slen < 2 || ac.JSON[0] != '"' || ac.JSON[slen-1] != '"' {
 		return model.ParseMissQuotationMark
 	}
 	av.S = ac.JSON[1 : slen-1]
