@@ -467,6 +467,35 @@ func Test_parseString(t *testing.T) {
 	}
 }
 
+func Test_parseArray(t *testing.T) {
+	tcs := []struct {
+		ac  *model.AsjsonContext
+		typ model.AsjsonType
+		len int
+		err error
+	}{
+		{
+			&model.AsjsonContext{JSON: "[]"},
+			model.AsjsonArray,
+			0,
+			nil,
+		},
+		{
+			&model.AsjsonContext{JSON: "[null]"},
+			model.AsjsonArray,
+			1,
+			nil,
+		},
+	}
+	for _, tc := range tcs {
+		var av model.AsjsonValue
+		err := parseArray(tc.ac, &av)
+		assert.Equal(t, tc.typ, av.Typ)
+		assert.Equal(t, tc.len, av.Len)
+		assert.Equal(t, tc.err, err)
+	}
+}
+
 func Test_parseValue(t *testing.T) {
 	tcs := []struct {
 		ac  *model.AsjsonContext

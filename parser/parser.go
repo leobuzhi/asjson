@@ -92,6 +92,44 @@ func parseString(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 	return model.ParseOK
 }
 
+func parseArray(ac *model.AsjsonContext, av *model.AsjsonValue) error {
+	alen := len(ac.JSON)
+	if alen < 2 || ac.JSON[0] != '[' {
+		return model.ParseMissOpenBracket
+	}
+
+	if alen == 2 && ac.JSON[1] == ']' {
+		av.Typ = model.AsjsonArray
+		av.Len = 0
+		ac.JSON = ac.JSON[2:]
+		return nil
+	}
+
+	var curr model.AsjsonValue
+	var len int
+	ac.JSON = ac.JSON[1:]
+	for {
+		var sav model.AsjsonValue
+		err := parseValue(ac, &sav)
+		if err != nil {
+			return err
+		}
+		curr.Next = &sav
+		len++
+		if ac.JSON[0] == ',' {
+			ac.JSON = ac.JSON[1:]
+		} else if ac.JSON[0] == ']' {
+			ac.JSON = ac.JSON[1:]
+			av.Typ = model.AsjsonArray
+			av.Len = len
+			av.Next = curr.Next
+			return nil
+		} else {
+			return model.ParseMissCommaOrCloseBracket
+		}
+	}
+}
+
 func parseValue(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 	if len(ac.JSON) == 0 {
 		return model.ParseExpectValue
@@ -105,6 +143,8 @@ func parseValue(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 		return parseFalse(ac, av)
 	case '"':
 		return parseString(ac, av)
+	case '[':
+		return parseArray(ac, av)
 	default:
 		return parseNumber(ac, av)
 	}
