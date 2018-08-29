@@ -2,8 +2,8 @@ package parser
 
 import (
 	"strconv"
-	"strings"
 
+	"github.com/leobuzhi/asjson/common"
 	"github.com/leobuzhi/asjson/model"
 )
 
@@ -63,16 +63,49 @@ func parseFalse(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 }
 
 func parseNumber(ac *model.AsjsonContext, av *model.AsjsonValue) error {
-	if len(ac.JSON) == 0 || ac.JSON[0] == '+' || ac.JSON[0] == '.' || ac.JSON[len(ac.JSON)-1] == '.' {
+	slen := len(ac.JSON)
+	if ac.JSON[slen-1] == '.' {
 		return model.ParseInvalidValue
 	}
-	if len(ac.JSON) == 3 {
-		invalidNum := strings.ToLower(ac.JSON)
-		if invalidNum == "inf" || invalidNum == "nan" {
+
+	var i int
+	if ac.JSON[i] == '-' {
+		i++
+	}
+	if ac.JSON[i] == '0' {
+		i++
+	} else {
+		if i < slen && !common.Isdigit1to9(ac.JSON[i]) {
 			return model.ParseInvalidValue
 		}
+		for i++; i < slen && common.Isdigit(ac.JSON[i]); i++ {
+		}
 	}
-	n, err := strconv.ParseFloat(ac.JSON, 64)
+
+	if i < slen && ac.JSON[i] == '.' {
+		i++
+		if i < slen && !common.Isdigit(ac.JSON[i]) {
+			return model.ParseInvalidValue
+		}
+		for i++; i < slen && common.Isdigit(ac.JSON[i]); i++ {
+		}
+	}
+	if i < slen {
+		if ac.JSON[i] == 'e' || ac.JSON[i] == 'E' {
+			i++
+			if i < slen {
+				if ac.JSON[i] == '+' || ac.JSON[i] == '-' {
+					i++
+				}
+			}
+			if i < slen && !common.Isdigit(ac.JSON[i]) {
+				return model.ParseInvalidValue
+			}
+			for i++; i < slen && common.Isdigit(ac.JSON[i]); i++ {
+			}
+		}
+	}
+	n, err := strconv.ParseFloat(ac.JSON[0:i], 64)
 	if err != nil {
 		return model.ParseInvalidValue
 	}
