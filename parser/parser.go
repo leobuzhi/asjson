@@ -111,6 +111,7 @@ func parseNumber(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 	}
 	av.Typ = model.AsjsonNumber
 	av.N = n
+	ac.JSON = ac.JSON[i:]
 	return model.ParseOK
 }
 

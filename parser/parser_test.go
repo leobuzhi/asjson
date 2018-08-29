@@ -486,6 +486,12 @@ func Test_parseArray(t *testing.T) {
 			1,
 			nil,
 		},
+		{
+			&model.AsjsonContext{JSON: "[null,false,true,123,1.23]"},
+			model.AsjsonArray,
+			5,
+			nil,
+		},
 	}
 	for _, tc := range tcs {
 		var av model.AsjsonValue
