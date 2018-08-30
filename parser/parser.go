@@ -118,11 +118,19 @@ func parseNumber(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 func parseString(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 	slen := len(ac.JSON)
 
-	if slen < 2 || ac.JSON[0] != '"' || ac.JSON[slen-1] != '"' {
+	if slen < 2 || ac.JSON[0] != '"' {
 		return model.ParseMissQuotationMark
 	}
-	av.S = ac.JSON[1 : slen-1]
+	var i int
+	for i = 1; i < len(ac.JSON); i++ {
+		if ac.JSON[i] == '"' {
+			break
+		}
+	}
+
+	av.S = ac.JSON[1:i]
 	av.Typ = model.AsjsonString
+	ac.JSON = ac.JSON[i+1:]
 	return model.ParseOK
 }
 
@@ -142,12 +150,22 @@ func parseArray(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 	var curr model.AsjsonValue
 	var len int
 	ac.JSON = ac.JSON[1:]
+	parseWhitespace(ac)
+	if ac.JSON[0] == ']' {
+		ac.JSON = ac.JSON[1:]
+		av.Typ = model.AsjsonArray
+		av.Len = 0
+		return nil
+	}
+
 	for {
+		parseWhitespace(ac)
 		var sav model.AsjsonValue
 		err := parseValue(ac, &sav)
 		if err != nil {
 			return err
 		}
+		parseWhitespace(ac)
 		curr.Next = &sav
 		len++
 		if ac.JSON[0] == ',' {
