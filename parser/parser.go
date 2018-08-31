@@ -140,13 +140,6 @@ func parseArray(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 		return model.ParseMissOpenBracket
 	}
 
-	if alen == 2 && ac.JSON[1] == ']' {
-		av.Typ = model.AsjsonArray
-		av.Len = 0
-		ac.JSON = ac.JSON[2:]
-		return nil
-	}
-
 	var curr model.AsjsonValue
 	var len int
 	ac.JSON = ac.JSON[1:]
@@ -168,6 +161,11 @@ func parseArray(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 		parseWhitespace(ac)
 		curr.Next = &sav
 		len++
+
+		if ac.JSON == "" {
+			return model.ParseMissCloseBracket
+		}
+
 		if ac.JSON[0] == ',' {
 			ac.JSON = ac.JSON[1:]
 		} else if ac.JSON[0] == ']' {
@@ -178,6 +176,62 @@ func parseArray(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 			return nil
 		} else {
 			return model.ParseMissCommaOrCloseBracket
+		}
+	}
+}
+
+func parseObject(ac *model.AsjsonContext, av *model.AsjsonValue) error {
+	alen := len(ac.JSON)
+	if alen < 2 || ac.JSON[0] != '{' {
+		return model.ParseMissOpenBrace
+	}
+
+	var curr model.AsjsonValue
+	var len int
+	ac.JSON = ac.JSON[1:]
+	parseWhitespace(ac)
+	if ac.JSON[0] == '}' {
+		ac.JSON = ac.JSON[1:]
+		av.Typ = model.AsjsonObject
+		av.Len = 0
+		return nil
+	}
+
+	for {
+		parseWhitespace(ac)
+		var sav model.AsjsonValue
+		err := parseString(ac, &sav)
+		if err != nil {
+			return err
+		}
+		parseWhitespace(ac)
+		if ac.JSON[0] != ':' {
+			return model.ParseMissColon
+		}
+		ac.JSON = ac.JSON[1:]
+		parseWhitespace(ac)
+		err = parseValue(ac, &sav)
+		if err != nil {
+			return err
+		}
+		parseWhitespace(ac)
+		curr.Next = &sav
+		len++
+
+		if ac.JSON == "" {
+			return model.ParseMissCloseBrace
+		}
+
+		if ac.JSON[0] == ',' {
+			ac.JSON = ac.JSON[1:]
+		} else if ac.JSON[0] == '}' {
+			ac.JSON = ac.JSON[1:]
+			av.Typ = model.AsjsonObject
+			av.Len = len
+			av.Next = curr.Next
+			return nil
+		} else {
+			return model.ParseMissCommaOrCloseBrace
 		}
 	}
 }
@@ -197,6 +251,8 @@ func parseValue(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 		return parseString(ac, av)
 	case '[':
 		return parseArray(ac, av)
+	case '{':
+		return parseObject(ac, av)
 	default:
 		return parseNumber(ac, av)
 	}

@@ -487,6 +487,12 @@ func Test_parseArray(t *testing.T) {
 			nil,
 		},
 		{
+			&model.AsjsonContext{JSON: "[null"},
+			model.AsjsonNAT,
+			0,
+			model.ParseMissCloseBracket,
+		},
+		{
 			&model.AsjsonContext{JSON: "[null,false,true,123,1.23]"},
 			model.AsjsonArray,
 			5,
@@ -526,6 +532,53 @@ func Test_parseArray(t *testing.T) {
 	for _, tc := range tcs {
 		var av model.AsjsonValue
 		err := parseArray(tc.ac, &av)
+		assert.Equal(t, tc.typ, av.Typ)
+		assert.Equal(t, tc.len, av.Len)
+		assert.Equal(t, tc.err, err)
+	}
+}
+
+func Test_parseObject(t *testing.T) {
+	tcs := []struct {
+		ac  *model.AsjsonContext
+		typ model.AsjsonType
+		len int
+		err error
+	}{
+		{
+			&model.AsjsonContext{JSON: "{}"},
+			model.AsjsonObject,
+			0,
+			nil,
+		},
+		{
+			&model.AsjsonContext{JSON: "{ \"key1\": 1    }"},
+			model.AsjsonObject,
+			1,
+			nil,
+		},
+		{
+			&model.AsjsonContext{JSON: "{ \"key2\":[ 1 ] }"},
+			model.AsjsonObject,
+			1,
+			nil,
+		},
+		{
+			&model.AsjsonContext{JSON: "{ \"key2\":[ 1 ] "},
+			model.AsjsonNAT,
+			0,
+			model.ParseMissCloseBrace,
+		},
+		{
+			&model.AsjsonContext{JSON: "{ \"key1\": 1 ,\"key2\":[ 1 ] , \"key3\":\"3\" ,\"key4\": false,\"key5\" : true,\"key6\":null }"},
+			model.AsjsonObject,
+			6,
+			nil,
+		},
+	}
+	for _, tc := range tcs {
+		var av model.AsjsonValue
+		err := parseObject(tc.ac, &av)
 		assert.Equal(t, tc.typ, av.Typ)
 		assert.Equal(t, tc.len, av.Len)
 		assert.Equal(t, tc.err, err)
