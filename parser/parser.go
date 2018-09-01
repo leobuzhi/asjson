@@ -205,7 +205,8 @@ func parseObject(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 			return err
 		}
 		parseWhitespace(ac)
-		if ac.JSON[0] != ':' {
+
+		if ac.JSON == "" || ac.JSON[0] != ':' {
 			return model.ParseMissColon
 		}
 		ac.JSON = ac.JSON[1:]

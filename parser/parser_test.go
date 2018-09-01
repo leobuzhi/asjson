@@ -575,6 +575,90 @@ func Test_parseObject(t *testing.T) {
 			6,
 			nil,
 		},
+		{
+			&model.AsjsonContext{JSON: "{   :[ 1 ] "},
+			model.AsjsonNAT,
+			0,
+			model.ParseMissQuotationMark,
+		},
+		{
+			&model.AsjsonContext{JSON: "{  1:1, "},
+			model.AsjsonNAT,
+			0,
+			model.ParseMissQuotationMark,
+		},
+		{
+			&model.AsjsonContext{JSON: "{true:1, "},
+			model.AsjsonNAT,
+			0,
+			model.ParseMissQuotationMark,
+		},
+		{
+			&model.AsjsonContext{JSON: "{false:1, "},
+			model.AsjsonNAT,
+			0,
+			model.ParseMissQuotationMark,
+		},
+		{
+			&model.AsjsonContext{JSON: "{null:1, "},
+			model.AsjsonNAT,
+			0,
+			model.ParseMissQuotationMark,
+		},
+		{
+			&model.AsjsonContext{JSON: "{[]:1, "},
+			model.AsjsonNAT,
+			0,
+			model.ParseMissQuotationMark,
+		},
+		{
+			&model.AsjsonContext{JSON: "{{}:1, "},
+			model.AsjsonNAT,
+			0,
+			model.ParseMissQuotationMark,
+		},
+		{
+			&model.AsjsonContext{JSON: "{\"a\":1, "},
+			model.AsjsonNAT,
+			0,
+			model.ParseMissQuotationMark,
+		},
+		{
+			&model.AsjsonContext{JSON: "{\"a\" "},
+			model.AsjsonNAT,
+			0,
+			model.ParseMissColon,
+		},
+		{
+			&model.AsjsonContext{JSON: "{\"a\" ,\"hello \""},
+			model.AsjsonNAT,
+			0,
+			model.ParseMissColon,
+		},
+		{
+			&model.AsjsonContext{JSON: "{\"a\":1"},
+			model.AsjsonNAT,
+			0,
+			model.ParseMissCloseBrace,
+		},
+		{
+			&model.AsjsonContext{JSON: "{\"a\":1]"},
+			model.AsjsonNAT,
+			0,
+			model.ParseMissCommaOrCloseBrace,
+		},
+		{
+			&model.AsjsonContext{JSON: "{\"a\":1 \"b\""},
+			model.AsjsonNAT,
+			0,
+			model.ParseMissCommaOrCloseBrace,
+		},
+		{
+			&model.AsjsonContext{JSON: "{\"a\":{}"},
+			model.AsjsonNAT,
+			0,
+			model.ParseMissCloseBrace,
+		},
 	}
 	for _, tc := range tcs {
 		var av model.AsjsonValue
@@ -632,9 +716,14 @@ func Test_parseValue(t *testing.T) {
 			model.ParseOK,
 		},
 		{
-			&model.AsjsonContext{JSON: "+1.2"},
-			model.AsjsonValue{N: 0, Typ: model.AsjsonNAT},
-			model.ParseInvalidValue,
+			&model.AsjsonContext{JSON: "[1.2]"},
+			model.AsjsonValue{N: 0, Typ: model.AsjsonArray},
+			model.ParseOK,
+		},
+		{
+			&model.AsjsonContext{JSON: "{\"1\":1.2}"},
+			model.AsjsonValue{N: 0, Typ: model.AsjsonObject},
+			model.ParseOK,
 		},
 	}
 
