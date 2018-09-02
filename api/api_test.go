@@ -3,7 +3,9 @@ package api
 import (
 	"fmt"
 	"github.com/leobuzhi/asjson/model"
+	"github.com/leobuzhi/asjson/parser"
 	"github.com/stretchr/testify/assert"
+	"reflect"
 	"testing"
 )
 
@@ -158,5 +160,57 @@ func Test_SetString(t *testing.T) {
 	for _, tc := range tcs {
 		err := SetString(&tc.av, tc.s)
 		assert.Equal(t, nil, err)
+	}
+}
+
+func Test_Stringify(t *testing.T) {
+	tcs := []struct {
+		rawText string
+	}{
+		{
+			"null",
+		},
+		{
+			"  null  ",
+		},
+		{
+			"false",
+		},
+		{
+			"  false  ",
+		},
+		{
+			"true",
+		},
+		{
+			"  true  ",
+		},
+		{
+			" -8.11 ",
+		},
+		{
+			"  2018  ",
+		},
+		{
+			" \"abc\" ",
+		},
+		{
+			"  \"golang is awesome\"  ",
+		},
+	}
+
+	for _, tc := range tcs {
+		ac := model.AsjsonContext{JSON: tc.rawText}
+		var av, newAv model.AsjsonValue
+		err := parser.Parse(ac.JSON, &av)
+		assert.Equal(t, nil, err)
+		ret, err := Stringify(av)
+		assert.Equal(t, nil, err)
+		err = parser.Parse(ret, &newAv)
+		assert.Equal(t, nil, err)
+
+		if !reflect.DeepEqual(av, newAv) {
+			t.Errorf("Stringify failed,got: %v,want: %v", av, newAv)
+		}
 	}
 }

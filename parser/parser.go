@@ -140,7 +140,7 @@ func parseArray(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 		return model.ParseMissOpenBracket
 	}
 
-	var curr model.AsjsonValue
+	curr := av
 	var len int
 	ac.JSON = ac.JSON[1:]
 	parseWhitespace(ac)
@@ -153,13 +153,15 @@ func parseArray(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 
 	for {
 		parseWhitespace(ac)
-		var sav model.AsjsonValue
-		err := parseValue(ac, &sav)
+		sav := new(model.AsjsonValue)
+		err := parseValue(ac, sav)
 		if err != nil {
 			return err
 		}
 		parseWhitespace(ac)
-		curr.Next = &sav
+
+		curr.Next = sav
+		curr = curr.Next
 		len++
 
 		if ac.JSON == "" {
@@ -172,7 +174,6 @@ func parseArray(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 			ac.JSON = ac.JSON[1:]
 			av.Typ = model.AsjsonArray
 			av.Len = len
-			av.Next = curr.Next
 			return nil
 		} else {
 			return model.ParseMissCommaOrCloseBracket
@@ -186,7 +187,7 @@ func parseObject(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 		return model.ParseMissOpenBrace
 	}
 
-	var curr model.AsjsonValue
+	curr := av
 	var len int
 	ac.JSON = ac.JSON[1:]
 	parseWhitespace(ac)
@@ -199,8 +200,8 @@ func parseObject(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 
 	for {
 		parseWhitespace(ac)
-		var sav model.AsjsonValue
-		err := parseString(ac, &sav)
+		sav := new(model.AsjsonValue)
+		err := parseString(ac, sav)
 		if err != nil {
 			return err
 		}
@@ -211,12 +212,14 @@ func parseObject(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 		}
 		ac.JSON = ac.JSON[1:]
 		parseWhitespace(ac)
-		err = parseValue(ac, &sav)
+		err = parseValue(ac, sav)
 		if err != nil {
 			return err
 		}
 		parseWhitespace(ac)
-		curr.Next = &sav
+
+		curr.Next = sav
+		curr = curr.Next
 		len++
 
 		if ac.JSON == "" {
@@ -229,7 +232,6 @@ func parseObject(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 			ac.JSON = ac.JSON[1:]
 			av.Typ = model.AsjsonObject
 			av.Len = len
-			av.Next = curr.Next
 			return nil
 		} else {
 			return model.ParseMissCommaOrCloseBrace
