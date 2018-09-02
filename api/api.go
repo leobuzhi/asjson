@@ -50,3 +50,23 @@ func SetString(av *model.AsjsonValue, s string) error {
 	av.S = s
 	return nil
 }
+
+func Stringify(av model.AsjsonValue) (string, error) {
+	var ret string
+	switch av.Typ {
+	case model.AsjsonNULL:
+		ret = "null"
+	case model.AsjsonFalse:
+		ret = "false"
+	case model.AsjsonTrue:
+		ret = "true"
+	case model.AsjsonNumber:
+		ret = fmt.Sprintf("%f", av.N)
+	case model.AsjsonString:
+		ret = fmt.Sprintf("\"%s\"", av.S)
+	//note(joey.chen): todo
+	case model.AsjsonArray:
+	}
+
+	return ret, nil
+}
