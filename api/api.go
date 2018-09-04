@@ -60,8 +60,11 @@ func Stringify(av model.AsjsonValue) (string, error) {
 		ret = "false"
 	case model.AsjsonTrue:
 		ret = "true"
+	//refefence(joey.chen):
+	//http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n2005.pdf
+	//https://golang.org/pkg/fmt/
 	case model.AsjsonNumber:
-		ret = fmt.Sprintf("%f", av.N)
+		ret = fmt.Sprintf("%.17g", av.N)
 	case model.AsjsonString:
 		ret = fmt.Sprintf("\"%s\"", av.S)
 	//note(joey.chen): todo

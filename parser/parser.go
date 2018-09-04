@@ -161,7 +161,9 @@ func parseArray(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 		parseWhitespace(ac)
 
 		curr.Next = sav
-		curr = curr.Next
+		for ; curr.Next != nil; curr = curr.Next {
+		}
+
 		len++
 
 		if ac.JSON == "" {
@@ -219,7 +221,8 @@ func parseObject(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 		parseWhitespace(ac)
 
 		curr.Next = sav
-		curr = curr.Next
+		for ; curr.Next != nil; curr = curr.Next {
+		}
 		len++
 
 		if ac.JSON == "" {
