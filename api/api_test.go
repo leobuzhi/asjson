@@ -197,6 +197,15 @@ func Test_Stringify(t *testing.T) {
 		{
 			"  \"golang is awesome\"  ",
 		},
+		{
+			"  [1 ,2 ,false ,true , null]  ",
+		},
+		{
+			"  [[1,2]]  ",
+		},
+		{
+			"  [1,[2,3,4,5],4]  ",
+		},
 	}
 
 	for _, tc := range tcs {
