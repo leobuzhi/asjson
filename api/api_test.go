@@ -197,6 +197,27 @@ func Test_Stringify(t *testing.T) {
 		{
 			"  \"golang is awesome\"  ",
 		},
+		{
+			"[]",
+		},
+		{
+			"[null]",
+		},
+		{
+			"[null,false,true,123,1.23]",
+		},
+		{
+			"[    null   ,  false  ,  true ,   123 ,  1.23]",
+		},
+		{
+			"[[], [   ] , [ 0 ] , [ 0 , 1 ] , [ 0 , 1 , 2 ] ]",
+		},
+		{
+			"[[1,2]] ",
+		},
+		{
+			"[1,[2,3,4,5],4] ",
+		},
 	}
 
 	for _, tc := range tcs {
@@ -204,7 +225,8 @@ func Test_Stringify(t *testing.T) {
 		var av, newAv model.AsjsonValue
 		err := parser.Parse(ac.JSON, &av)
 		assert.Equal(t, nil, err)
-		ret, err := Stringify(av)
+		avp := &av
+		ret, err := Stringify(&avp, av.Len)
 		assert.Equal(t, nil, err)
 		err = parser.Parse(ret, &newAv)
 		assert.Equal(t, nil, err)
