@@ -51,9 +51,9 @@ func SetString(av *model.AsjsonValue, s string) error {
 	return nil
 }
 
-func Stringify(av model.AsjsonValue) (string, error) {
+func Stringify(av **model.AsjsonValue, len int) (string, error) {
 	var ret string
-	switch av.Typ {
+	switch (*av).Typ {
 	case model.AsjsonNULL:
 		ret = "null"
 	case model.AsjsonFalse:
@@ -64,11 +64,30 @@ func Stringify(av model.AsjsonValue) (string, error) {
 	//http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n2005.pdf
 	//https://golang.org/pkg/fmt/
 	case model.AsjsonNumber:
-		ret = fmt.Sprintf("%.17g", av.N)
+		ret = fmt.Sprintf("%.17g", (*av).N)
 	case model.AsjsonString:
-		ret = fmt.Sprintf("\"%s\"", av.S)
-	//note(joey.chen): todo
+		ret = fmt.Sprintf("\"%s\"", (*av).S)
 	case model.AsjsonArray:
+		ret += "["
+		curr := *av
+		for i := 0; i < (*av).Len && curr != nil; i++ {
+			curr = (*curr).Next
+			len--
+			str, err := Stringify(&curr, curr.Len)
+			if err != nil {
+				return "", err
+			}
+
+			if i != (*av).Len-1 {
+				ret += str + ","
+			} else {
+				ret += str
+			}
+		}
+		if len == 0 {
+			ret += "]"
+		}
+		*av = curr
 	}
 
 	return ret, nil
