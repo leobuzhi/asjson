@@ -163,7 +163,7 @@ func Test_SetString(t *testing.T) {
 	}
 }
 
-func Test_Stringify(t *testing.T) {
+func Test_stringify(t *testing.T) {
 	tcs := []struct {
 		rawText string
 	}{
@@ -218,6 +218,15 @@ func Test_Stringify(t *testing.T) {
 		{
 			"[1,[2,3,4,5],4] ",
 		},
+		{
+			"{}",
+		},
+		{
+			"{\"key1\":1}",
+		},
+		{
+			"{\"key1\":1,\"key2\":false,\"key3\":[false],\"key4\":{},\"key5\":{\"newkey1\":\"ok\"}}",
+		},
 	}
 
 	for _, tc := range tcs {
@@ -226,13 +235,13 @@ func Test_Stringify(t *testing.T) {
 		err := parser.Parse(ac.JSON, &av)
 		assert.Equal(t, nil, err)
 		avp := &av
-		ret, err := Stringify(&avp, av.Len)
+		ret, err := stringify(&avp, av.Len)
 		assert.Equal(t, nil, err)
 		err = parser.Parse(ret, &newAv)
 		assert.Equal(t, nil, err)
 
 		if !reflect.DeepEqual(av, newAv) {
-			t.Errorf("Stringify failed,got: %v,want: %v", av, newAv)
+			t.Errorf("stringify failed,got: %v,want: %v", av, newAv)
 		}
 	}
 }
