@@ -208,12 +208,15 @@ func parseObject(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 			return err
 		}
 		parseWhitespace(ac)
+		curr.Next = sav
+		curr = curr.Next
 
 		if ac.JSON == "" || ac.JSON[0] != ':' {
 			return model.ParseMissColon
 		}
 		ac.JSON = ac.JSON[1:]
 		parseWhitespace(ac)
+		sav = new(model.AsjsonValue)
 		err = parseValue(ac, sav)
 		if err != nil {
 			return err
@@ -223,7 +226,7 @@ func parseObject(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 		curr.Next = sav
 		for ; curr.Next != nil; curr = curr.Next {
 		}
-		len++
+		len += 2
 
 		if ac.JSON == "" {
 			return model.ParseMissCloseBrace

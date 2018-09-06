@@ -10,8 +10,11 @@ import (
 
 func main() {
 	var av model.AsjsonValue
-	fmt.Println(parser.Parse("[    1   ,[2,[],3], 6   ]", &av))
+	fmt.Println(parser.Parse("{\"key1\":1,\"key2\":{ \"key3\":3},\"key4\":[1,2,3]}", &av))
 	fmt.Println(av)
+	for curr := &av; curr != nil; curr = curr.Next {
+		fmt.Println(curr.N, curr.S, curr.Typ, curr.Len)
+	}
 	head := &av
-	fmt.Println(api.Stringify(&head, av.Len))
+	fmt.Println(api.Stringify(&head))
 }

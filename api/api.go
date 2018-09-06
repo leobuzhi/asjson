@@ -51,7 +51,7 @@ func SetString(av *model.AsjsonValue, s string) error {
 	return nil
 }
 
-func Stringify(av **model.AsjsonValue, len int) (string, error) {
+func stringify(av **model.AsjsonValue, len int) (string, error) {
 	var ret string
 	switch (*av).Typ {
 	case model.AsjsonNULL:
@@ -73,7 +73,7 @@ func Stringify(av **model.AsjsonValue, len int) (string, error) {
 		for i := 0; i < (*av).Len && curr != nil; i++ {
 			curr = (*curr).Next
 			len--
-			str, err := Stringify(&curr, curr.Len)
+			str, err := stringify(&curr, curr.Len)
 			if err != nil {
 				return "", err
 			}
@@ -88,7 +88,37 @@ func Stringify(av **model.AsjsonValue, len int) (string, error) {
 			ret += "]"
 		}
 		*av = curr
+	case model.AsjsonObject:
+		ret += "{"
+		curr := *av
+		for i := 0; i < (*av).Len && curr != nil; i++ {
+			curr = (*curr).Next
+			len--
+			str, err := stringify(&curr, curr.Len)
+			if err != nil {
+				return "", err
+			}
+
+			if len%2 == 1 {
+				ret += str + ":"
+			} else {
+				if i != (*av).Len-1 {
+					ret += str + ","
+				} else {
+					ret += str
+				}
+			}
+
+		}
+		if len == 0 {
+			ret += "}"
+		}
+		*av = curr
 	}
 
 	return ret, nil
+}
+
+func Stringify(av **model.AsjsonValue) (string, error) {
+	return stringify(av, (*av).Len)
 }

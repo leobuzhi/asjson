@@ -554,13 +554,13 @@ func Test_parseObject(t *testing.T) {
 		{
 			&model.AsjsonContext{JSON: "{ \"key1\": 1    }"},
 			model.AsjsonObject,
-			1,
+			2,
 			nil,
 		},
 		{
 			&model.AsjsonContext{JSON: "{ \"key2\":[ 1 ] }"},
 			model.AsjsonObject,
-			1,
+			2,
 			nil,
 		},
 		{
@@ -572,7 +572,7 @@ func Test_parseObject(t *testing.T) {
 		{
 			&model.AsjsonContext{JSON: "{ \"key1\": 1 ,\"key2\":[ 1 ] , \"key3\":\"3\" ,\"key4\": false,\"key5\" : true,\"key6\":null }"},
 			model.AsjsonObject,
-			6,
+			12,
 			nil,
 		},
 		{
@@ -658,6 +658,12 @@ func Test_parseObject(t *testing.T) {
 			model.AsjsonNAT,
 			0,
 			model.ParseMissCloseBrace,
+		},
+		{
+			&model.AsjsonContext{JSON: "{ \"key1\": 1 ,\"key2\":2 ,\"key3\":{\"key3\": 3 ,\"key4\":4}  }"},
+			model.AsjsonObject,
+			6,
+			nil,
 		},
 	}
 	for _, tc := range tcs {
