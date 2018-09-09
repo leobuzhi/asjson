@@ -6,11 +6,15 @@ go:
   - 1.9.x
   - 1.x
 
+before_install:
+  - go get github.com/mattn/goveralls
+
 before_script:
   - go get -u github.com/golang/dep/cmd/dep
   - dep ensure
 
 script:
+  - goveralls -service=travis-ci
   - go test -v -race ./...  # Run all the tests with the race detector enabled
 
 after_success:
