@@ -1,8 +1,15 @@
+/*
+ * @Author: Joey.Chen
+ * @Date: 2018-09-10 08:25:31
+ * @Last Modified by: Joey.Chen
+ * @Last Modified time: 2018-09-10 08:26:22
+ */
 package common
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_Isdigit(t *testing.T) {

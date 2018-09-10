@@ -1,9 +1,16 @@
+/*
+ * @Author: Joey.Chen
+ * @Date: 2018-09-10 08:25:38
+ * @Last Modified by: Joey.Chen
+ * @Last Modified time: 2018-09-10 08:26:09
+ */
 package parser
 
 import (
+	"testing"
+
 	"github.com/leobuzhi/asjson/model"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func Test_Parse(t *testing.T) {
