@@ -1,3 +1,9 @@
+/*
+ * @Author: Joey.Chen
+ * @Date: 2018-09-10 08:25:27
+ * @Last Modified by: Joey.Chen
+ * @Last Modified time: 2018-09-10 08:27:10
+ */
 package api
 
 import (
@@ -81,8 +87,7 @@ func Test_stringify(t *testing.T) {
 		err := parser.Parse(ac.JSON, &av)
 		assert.Equal(t, nil, err)
 		avp := &av
-		ret, err := stringify(&avp, av.Len)
-		assert.Equal(t, nil, err)
+		ret := stringify(&avp, av.Len)
 		err = parser.Parse(ret, &newAv)
 		assert.Equal(t, nil, err)
 
@@ -154,6 +159,10 @@ func Test_stringBeautify(t *testing.T) {
   }
 }`,
 		},
+		{
+			"true",
+			"true",
+		},
 	}
 
 	for _, tc := range tcs {
@@ -162,8 +171,62 @@ func Test_stringBeautify(t *testing.T) {
 		err := parser.Parse(ac.JSON, &av)
 		assert.Equal(t, nil, err)
 		avp := &av
-		ret, err := stringBeautify(&avp, av.Len, 1)
+		ret := stringBeautify(&avp, av.Len, 1)
+		assert.Equal(t, tc.retText, ret)
+	}
+}
+
+func Test_Stringify(t *testing.T) {
+	tcs := []struct {
+		rawText string
+		retText string
+	}{
+		{
+			"[1 , 2 ,3]",
+			`[1,2,3]`,
+		},
+		{
+			`{"key1"   :  1,"key2"  :   true}`,
+			`{"key1":1,"key2":true}`,
+		},
+	}
+	for _, tc := range tcs {
+		var av model.AsjsonValue
+		err := parser.Parse(tc.rawText, &av)
 		assert.Equal(t, nil, err)
+		head := &av
+		ret := Stringify(&head)
+		assert.Equal(t, tc.retText, ret)
+	}
+}
+
+func Test_StringBeautify(t *testing.T) {
+	tcs := []struct {
+		rawText string
+		retText string
+	}{
+		{
+			"[1 , 2 ,3]",
+			`[
+  1,
+  2,
+  3
+]`,
+		},
+		{
+			`{"key1"   :  1,"key2"  :   true}`,
+			`{
+  "key1":1,
+  "key2":true
+}`,
+		},
+	}
+	for _, tc := range tcs {
+		var av model.AsjsonValue
+		err := parser.Parse(tc.rawText, &av)
+		assert.Equal(t, nil, err)
+		head := &av
+		ret := StringBeautify(&head)
 		assert.Equal(t, tc.retText, ret)
 	}
 }

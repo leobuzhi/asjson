@@ -1,9 +1,16 @@
+/*
+ * @Author: Joey.Chen
+ * @Date: 2018-09-10 08:25:38
+ * @Last Modified by: Joey.Chen
+ * @Last Modified time: 2018-09-11 00:42:33
+ */
 package parser
 
 import (
+	"testing"
+
 	"github.com/leobuzhi/asjson/model"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func Test_Parse(t *testing.T) {
@@ -61,6 +68,97 @@ func Test_Parse(t *testing.T) {
 			"\"",
 			model.AsjsonNAT,
 			model.ParseMissQuotationMark,
+		},
+		{
+			"null,",
+			model.AsjsonNAT,
+			model.ParseRootNotSingular,
+		},
+		{
+			"nul",
+			model.AsjsonNAT,
+			model.ParseInvalidValue,
+		},
+		{
+			"tru",
+			model.AsjsonNAT,
+			model.ParseInvalidValue,
+		},
+		{
+			"fal",
+			model.AsjsonNAT,
+			model.ParseInvalidValue,
+		},
+		{
+			".1",
+			model.AsjsonNAT,
+			model.ParseInvalidValue,
+		},
+		{
+			"a",
+			model.AsjsonNAT,
+			model.ParseInvalidValue,
+		},
+		{
+			"0.a",
+			model.AsjsonNAT,
+			model.ParseInvalidValue,
+		},
+		{
+			"1E10",
+			model.AsjsonNumber,
+			model.ParseOK,
+		},
+		{
+			"1E+10",
+			model.AsjsonNumber,
+			model.ParseOK,
+		},
+		{
+			"1E+a",
+			model.AsjsonNAT,
+			model.ParseInvalidValue,
+		},
+		{
+			"1E+99",
+			model.AsjsonNumber,
+			model.ParseOK,
+		},
+		//note(joey.chen): overflow
+		{
+			"1E+99999999",
+			model.AsjsonNAT,
+			model.ParseInvalidValue,
+		},
+		{
+			`"`,
+			model.AsjsonNAT,
+			model.ParseMissQuotationMark,
+		},
+		{
+			`[`,
+			model.AsjsonNAT,
+			model.ParseMissOpenBracket,
+		},
+		{
+			`[nul]`,
+			model.AsjsonNAT,
+			model.ParseInvalidValue,
+		},
+		{
+			`[null`,
+			model.AsjsonNAT,
+			model.ParseMissCloseBracket,
+		},
+		{
+			`{`,
+			model.AsjsonNAT,
+			model.ParseMissOpenBrace,
+		},
+		{
+			``,
+			model.AsjsonNAT,
+			model.ParseExpectValue,
 		},
 	}
 	for _, tc := range tcs {

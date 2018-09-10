@@ -1,3 +1,9 @@
+/*
+ * @Author: Joey.Chen
+ * @Date: 2018-09-10 08:25:48
+ * @Last Modified by:   Joey.Chen
+ * @Last Modified time: 2018-09-10 08:25:48
+ */
 package main
 
 import (
@@ -34,13 +40,9 @@ func main() {
 	}
 	head := &av
 	if *min {
-		ret, err = api.Stringify(&head)
+		ret = api.Stringify(&head)
 	} else {
-		ret, err = api.StringBeautify(&head)
-	}
-
-	if err != nil {
-		fmt.Printf("stringify json err: %v\n", err)
+		ret = api.StringBeautify(&head)
 	}
 	fmt.Println(ret)
 }

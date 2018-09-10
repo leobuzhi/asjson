@@ -1,3 +1,9 @@
+/*
+ * @Author: Joey.Chen
+ * @Date: 2018-09-10 08:25:29
+ * @Last Modified by: Joey.Chen
+ * @Last Modified time: 2018-09-10 08:27:15
+ */
 package api
 
 import (
@@ -6,7 +12,7 @@ import (
 	"github.com/leobuzhi/asjson/model"
 )
 
-func stringify(av **model.AsjsonValue, len int) (string, error) {
+func stringify(av **model.AsjsonValue, len int) string {
 	var ret string
 	switch (*av).Typ {
 	case model.AsjsonNULL:
@@ -28,10 +34,7 @@ func stringify(av **model.AsjsonValue, len int) (string, error) {
 		for i := 0; i < (*av).Len && curr != nil; i++ {
 			curr = (*curr).Next
 			len--
-			str, err := stringify(&curr, curr.Len)
-			if err != nil {
-				return "", err
-			}
+			str := stringify(&curr, curr.Len)
 
 			if i != (*av).Len-1 {
 				ret += str + ","
@@ -49,10 +52,7 @@ func stringify(av **model.AsjsonValue, len int) (string, error) {
 		for i := 0; i < (*av).Len && curr != nil; i++ {
 			curr = (*curr).Next
 			len--
-			str, err := stringify(&curr, curr.Len)
-			if err != nil {
-				return "", err
-			}
+			str := stringify(&curr, curr.Len)
 
 			if len%2 == 1 {
 				ret += str + ":"
@@ -71,10 +71,10 @@ func stringify(av **model.AsjsonValue, len int) (string, error) {
 		*av = curr
 	}
 
-	return ret, nil
+	return ret
 }
 
-func stringBeautify(av **model.AsjsonValue, len, dep int) (string, error) {
+func stringBeautify(av **model.AsjsonValue, len, dep int) string {
 	var ret string
 	switch (*av).Typ {
 	case model.AsjsonArray, model.AsjsonObject:
@@ -104,10 +104,7 @@ func stringBeautify(av **model.AsjsonValue, len, dep int) (string, error) {
 		for i := 0; i < (*av).Len && curr != nil; i++ {
 			curr = (*curr).Next
 			len--
-			str, err := stringBeautify(&curr, curr.Len, dep+1)
-			if err != nil {
-				return "", err
-			}
+			str := stringBeautify(&curr, curr.Len, dep+1)
 
 			for i := 0; i < dep; i++ {
 				ret += "  "
@@ -131,10 +128,7 @@ func stringBeautify(av **model.AsjsonValue, len, dep int) (string, error) {
 		for i := 0; i < (*av).Len && curr != nil; i++ {
 			curr = (*curr).Next
 			len--
-			str, err := stringBeautify(&curr, curr.Len, dep+1)
-			if err != nil {
-				return "", err
-			}
+			str := stringBeautify(&curr, curr.Len, dep+1)
 
 			if len%2 == 1 {
 				for i := 0; i < dep; i++ {
@@ -159,13 +153,13 @@ func stringBeautify(av **model.AsjsonValue, len, dep int) (string, error) {
 		*av = curr
 	}
 
-	return ret, nil
+	return ret
 }
 
-func Stringify(av **model.AsjsonValue) (string, error) {
+func Stringify(av **model.AsjsonValue) string {
 	return stringify(av, (*av).Len)
 }
 
-func StringBeautify(av **model.AsjsonValue) (string, error) {
+func StringBeautify(av **model.AsjsonValue) string {
 	return stringBeautify(av, (*av).Len, 1)
 }
