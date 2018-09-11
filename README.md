@@ -1,5 +1,4 @@
-# A simple json format tool implement by golang.
-
+# A Golang implementation of a simple json format tool
 [![Build Status](https://travis-ci.org/leobuzhi/asjson.svg?branch=master)](https://travis-ci.org/leobuzhi/asjson)
 [![Coverage Status](https://coveralls.io/repos/github/leobuzhi/asjson/badge.svg?branch=master)](https://coveralls.io/github/leobuzhi/asjson?branch=master)
 
