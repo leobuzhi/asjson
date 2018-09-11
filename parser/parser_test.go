@@ -2,7 +2,7 @@
  * @Author: Joey.Chen
  * @Date: 2018-09-10 08:25:38
  * @Last Modified by: Joey.Chen
- * @Last Modified time: 2018-09-11 00:42:33
+ * @Last Modified time: 2018-09-11 22:53:34
  */
 package parser
 
@@ -626,6 +626,12 @@ func Test_parseArray(t *testing.T) {
 			5,
 			nil,
 		},
+		{
+			&model.AsjsonContext{JSON: `["123":]`},
+			model.AsjsonNAT,
+			0,
+			model.ParseMissCommaOrCloseBracket,
+		},
 	}
 	for _, tc := range tcs {
 		var av model.AsjsonValue
@@ -762,6 +768,12 @@ func Test_parseObject(t *testing.T) {
 			model.AsjsonObject,
 			6,
 			nil,
+		},
+		{
+			&model.AsjsonContext{JSON: `{"key":ok`},
+			model.AsjsonNAT,
+			0,
+			model.ParseInvalidValue,
 		},
 	}
 	for _, tc := range tcs {
