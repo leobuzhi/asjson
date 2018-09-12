@@ -7,10 +7,9 @@
 go test ./...
 ```
 
-## Install
+## Installation
 ```
 go get github.com/leobuzhi/asjson
-cp $GOPATH/bin/asjson  /usr/local/bin/
 ```
 
 ## Useage
