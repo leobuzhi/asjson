@@ -1,6 +1,7 @@
 # A Golang implementation of a simple json format tool
 [![Build Status](https://travis-ci.org/leobuzhi/asjson.svg?branch=master)](https://travis-ci.org/leobuzhi/asjson)
 [![codecov](https://codecov.io/gh/leobuzhi/asjson/branch/master/graph/badge.svg)](https://codecov.io/gh/leobuzhi/asjson)
+[![Go Report Card](https://goreportcard.com/badge/github.com/leobuzhi/asjson)](https://goreportcard.com/report/github.com/leobuzhi/asjson)
 
 ## Test
 ```
