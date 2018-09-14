@@ -2,7 +2,7 @@
  * @Author: Joey.Chen
  * @Date: 2018-09-10 08:25:29
  * @Last Modified by: Joey.Chen
- * @Last Modified time: 2018-09-10 08:27:15
+ * @Last Modified time: 2018-09-14 22:21:10
  */
 package api
 
@@ -156,10 +156,12 @@ func stringBeautify(av **model.AsjsonValue, len, dep int) string {
 	return ret
 }
 
+//Stringify minimize json
 func Stringify(av **model.AsjsonValue) string {
 	return stringify(av, (*av).Len)
 }
 
+//StringBeautify beautify json
 func StringBeautify(av **model.AsjsonValue) string {
 	return stringBeautify(av, (*av).Len, 1)
 }

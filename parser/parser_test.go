@@ -22,7 +22,7 @@ func Test_Parse(t *testing.T) {
 		{
 			"",
 			model.AsjsonNAT,
-			model.ParseExpectValue,
+			model.ErrParseExpectValue,
 		},
 		{
 			"null",
@@ -62,47 +62,47 @@ func Test_Parse(t *testing.T) {
 		{
 			"\r\n\t  null  abc",
 			model.AsjsonNAT,
-			model.ParseRootNotSingular,
+			model.ErrParseRootNotSingular,
 		},
 		{
 			"\"",
 			model.AsjsonNAT,
-			model.ParseMissQuotationMark,
+			model.ErrParseMissQuotationMark,
 		},
 		{
 			"null,",
 			model.AsjsonNAT,
-			model.ParseRootNotSingular,
+			model.ErrParseRootNotSingular,
 		},
 		{
 			"nul",
 			model.AsjsonNAT,
-			model.ParseInvalidValue,
+			model.ErrParseInvalidValue,
 		},
 		{
 			"tru",
 			model.AsjsonNAT,
-			model.ParseInvalidValue,
+			model.ErrParseInvalidValue,
 		},
 		{
 			"fal",
 			model.AsjsonNAT,
-			model.ParseInvalidValue,
+			model.ErrParseInvalidValue,
 		},
 		{
 			".1",
 			model.AsjsonNAT,
-			model.ParseInvalidValue,
+			model.ErrParseInvalidValue,
 		},
 		{
 			"a",
 			model.AsjsonNAT,
-			model.ParseInvalidValue,
+			model.ErrParseInvalidValue,
 		},
 		{
 			"0.a",
 			model.AsjsonNAT,
-			model.ParseInvalidValue,
+			model.ErrParseInvalidValue,
 		},
 		{
 			"1E10",
@@ -117,7 +117,7 @@ func Test_Parse(t *testing.T) {
 		{
 			"1E+a",
 			model.AsjsonNAT,
-			model.ParseInvalidValue,
+			model.ErrParseInvalidValue,
 		},
 		{
 			"1E+99",
@@ -128,37 +128,37 @@ func Test_Parse(t *testing.T) {
 		{
 			"1E+99999999",
 			model.AsjsonNAT,
-			model.ParseInvalidValue,
+			model.ErrParseInvalidValue,
 		},
 		{
 			`"`,
 			model.AsjsonNAT,
-			model.ParseMissQuotationMark,
+			model.ErrParseMissQuotationMark,
 		},
 		{
 			`[`,
 			model.AsjsonNAT,
-			model.ParseMissOpenBracket,
+			model.ErrParseMissOpenBracket,
 		},
 		{
 			`[nul]`,
 			model.AsjsonNAT,
-			model.ParseInvalidValue,
+			model.ErrParseInvalidValue,
 		},
 		{
 			`[null`,
 			model.AsjsonNAT,
-			model.ParseMissCloseBracket,
+			model.ErrParseMissCloseBracket,
 		},
 		{
 			`{`,
 			model.AsjsonNAT,
-			model.ParseMissOpenBrace,
+			model.ErrParseMissOpenBrace,
 		},
 		{
 			``,
 			model.AsjsonNAT,
-			model.ParseExpectValue,
+			model.ErrParseExpectValue,
 		},
 	}
 	for _, tc := range tcs {
@@ -184,12 +184,12 @@ func Test_parseNull(t *testing.T) {
 		{
 			&model.AsjsonContext{},
 			model.AsjsonNAT,
-			model.ParseInvalidValue,
+			model.ErrParseInvalidValue,
 		},
 		{
 			&model.AsjsonContext{JSON: "nul"},
 			model.AsjsonNAT,
-			model.ParseInvalidValue,
+			model.ErrParseInvalidValue,
 		},
 	}
 
@@ -215,17 +215,17 @@ func Test_parseTrue(t *testing.T) {
 		{
 			&model.AsjsonContext{},
 			model.AsjsonNAT,
-			model.ParseInvalidValue,
+			model.ErrParseInvalidValue,
 		},
 		{
 			&model.AsjsonContext{JSON: "tr"},
 			model.AsjsonNAT,
-			model.ParseInvalidValue,
+			model.ErrParseInvalidValue,
 		},
 		{
 			&model.AsjsonContext{JSON: "True"},
 			model.AsjsonNAT,
-			model.ParseInvalidValue,
+			model.ErrParseInvalidValue,
 		},
 	}
 
@@ -251,22 +251,22 @@ func Test_parseFalse(t *testing.T) {
 		{
 			&model.AsjsonContext{},
 			model.AsjsonNAT,
-			model.ParseInvalidValue,
+			model.ErrParseInvalidValue,
 		},
 		{
 			&model.AsjsonContext{JSON: "tr"},
 			model.AsjsonNAT,
-			model.ParseInvalidValue,
+			model.ErrParseInvalidValue,
 		},
 		{
 			&model.AsjsonContext{JSON: "True"},
 			model.AsjsonNAT,
-			model.ParseInvalidValue,
+			model.ErrParseInvalidValue,
 		},
 		{
 			&model.AsjsonContext{JSON: "False"},
 			model.AsjsonNAT,
-			model.ParseInvalidValue,
+			model.ErrParseInvalidValue,
 		},
 	}
 
@@ -392,49 +392,49 @@ func Test_parseNumber(t *testing.T) {
 			&model.AsjsonContext{JSON: "+0"},
 			model.AsjsonNAT,
 			0.0,
-			model.ParseInvalidValue,
+			model.ErrParseInvalidValue,
 		},
 		{
 			&model.AsjsonContext{JSON: "+1"},
 			model.AsjsonNAT,
 			0.0,
-			model.ParseInvalidValue,
+			model.ErrParseInvalidValue,
 		},
 		{
 			&model.AsjsonContext{JSON: ".123"},
 			model.AsjsonNAT,
 			0.0,
-			model.ParseInvalidValue,
+			model.ErrParseInvalidValue,
 		},
 		{
 			&model.AsjsonContext{JSON: "1."},
 			model.AsjsonNAT,
 			0.0,
-			model.ParseInvalidValue,
+			model.ErrParseInvalidValue,
 		},
 		{
 			&model.AsjsonContext{JSON: "INF"},
 			model.AsjsonNAT,
 			0.0,
-			model.ParseInvalidValue,
+			model.ErrParseInvalidValue,
 		},
 		{
 			&model.AsjsonContext{JSON: "inf"},
 			model.AsjsonNAT,
 			0.0,
-			model.ParseInvalidValue,
+			model.ErrParseInvalidValue,
 		},
 		{
 			&model.AsjsonContext{JSON: "NAN"},
 			model.AsjsonNAT,
 			0.0,
-			model.ParseInvalidValue,
+			model.ErrParseInvalidValue,
 		},
 		{
 			&model.AsjsonContext{JSON: "nan"},
 			model.AsjsonNAT,
 			0.0,
-			model.ParseInvalidValue,
+			model.ErrParseInvalidValue,
 		},
 		{
 			&model.AsjsonContext{JSON: "1E012"},
@@ -535,7 +535,7 @@ func Test_parseString(t *testing.T) {
 			&model.AsjsonContext{JSON: `"`},
 			model.AsjsonNAT,
 			``,
-			model.ParseMissQuotationMark,
+			model.ErrParseMissQuotationMark,
 		},
 		{
 			&model.AsjsonContext{JSON: "\"\""},
@@ -588,7 +588,7 @@ func Test_parseArray(t *testing.T) {
 			&model.AsjsonContext{JSON: "[null"},
 			model.AsjsonNAT,
 			0,
-			model.ParseMissCloseBracket,
+			model.ErrParseMissCloseBracket,
 		},
 		{
 			&model.AsjsonContext{JSON: "[null,false,true,123,1.23]"},
@@ -606,7 +606,7 @@ func Test_parseArray(t *testing.T) {
 			&model.AsjsonContext{JSON: "[1.23,]"},
 			model.AsjsonNAT,
 			0,
-			model.ParseInvalidValue,
+			model.ErrParseInvalidValue,
 		},
 		{
 			&model.AsjsonContext{JSON: "[    null   ,  false  ,  true ,   123 ,  1.23,  \"123\",\"abc\"]"},
@@ -630,7 +630,7 @@ func Test_parseArray(t *testing.T) {
 			&model.AsjsonContext{JSON: `["123":]`},
 			model.AsjsonNAT,
 			0,
-			model.ParseMissCommaOrCloseBracket,
+			model.ErrParseMissCommaOrCloseBracket,
 		},
 	}
 	for _, tc := range tcs {
@@ -671,7 +671,7 @@ func Test_parseObject(t *testing.T) {
 			&model.AsjsonContext{JSON: "{ \"key2\":[ 1 ] "},
 			model.AsjsonNAT,
 			0,
-			model.ParseMissCloseBrace,
+			model.ErrParseMissCloseBrace,
 		},
 		{
 			&model.AsjsonContext{JSON: "{ \"key1\": 1 ,\"key2\":[ 1 ] , \"key3\":\"3\" ,\"key4\": false,\"key5\" : true,\"key6\":null }"},
@@ -683,85 +683,85 @@ func Test_parseObject(t *testing.T) {
 			&model.AsjsonContext{JSON: "{   :[ 1 ] "},
 			model.AsjsonNAT,
 			0,
-			model.ParseMissQuotationMark,
+			model.ErrParseMissQuotationMark,
 		},
 		{
 			&model.AsjsonContext{JSON: "{  1:1, "},
 			model.AsjsonNAT,
 			0,
-			model.ParseMissQuotationMark,
+			model.ErrParseMissQuotationMark,
 		},
 		{
 			&model.AsjsonContext{JSON: "{true:1, "},
 			model.AsjsonNAT,
 			0,
-			model.ParseMissQuotationMark,
+			model.ErrParseMissQuotationMark,
 		},
 		{
 			&model.AsjsonContext{JSON: "{false:1, "},
 			model.AsjsonNAT,
 			0,
-			model.ParseMissQuotationMark,
+			model.ErrParseMissQuotationMark,
 		},
 		{
 			&model.AsjsonContext{JSON: "{null:1, "},
 			model.AsjsonNAT,
 			0,
-			model.ParseMissQuotationMark,
+			model.ErrParseMissQuotationMark,
 		},
 		{
 			&model.AsjsonContext{JSON: "{[]:1, "},
 			model.AsjsonNAT,
 			0,
-			model.ParseMissQuotationMark,
+			model.ErrParseMissQuotationMark,
 		},
 		{
 			&model.AsjsonContext{JSON: "{{}:1, "},
 			model.AsjsonNAT,
 			0,
-			model.ParseMissQuotationMark,
+			model.ErrParseMissQuotationMark,
 		},
 		{
 			&model.AsjsonContext{JSON: "{\"a\":1, "},
 			model.AsjsonNAT,
 			0,
-			model.ParseMissQuotationMark,
+			model.ErrParseMissQuotationMark,
 		},
 		{
 			&model.AsjsonContext{JSON: "{\"a\" "},
 			model.AsjsonNAT,
 			0,
-			model.ParseMissColon,
+			model.ErrParseMissColon,
 		},
 		{
 			&model.AsjsonContext{JSON: "{\"a\" ,\"hello \""},
 			model.AsjsonNAT,
 			0,
-			model.ParseMissColon,
+			model.ErrParseMissColon,
 		},
 		{
 			&model.AsjsonContext{JSON: "{\"a\":1"},
 			model.AsjsonNAT,
 			0,
-			model.ParseMissCloseBrace,
+			model.ErrParseMissCloseBrace,
 		},
 		{
 			&model.AsjsonContext{JSON: "{\"a\":1]"},
 			model.AsjsonNAT,
 			0,
-			model.ParseMissCommaOrCloseBrace,
+			model.ErrParseMissCommaOrCloseBrace,
 		},
 		{
 			&model.AsjsonContext{JSON: "{\"a\":1 \"b\""},
 			model.AsjsonNAT,
 			0,
-			model.ParseMissCommaOrCloseBrace,
+			model.ErrParseMissCommaOrCloseBrace,
 		},
 		{
 			&model.AsjsonContext{JSON: "{\"a\":{}"},
 			model.AsjsonNAT,
 			0,
-			model.ParseMissCloseBrace,
+			model.ErrParseMissCloseBrace,
 		},
 		{
 			&model.AsjsonContext{JSON: "{ \"key1\": 1 ,\"key2\":2 ,\"key3\":{\"key3\": 3 ,\"key4\":4}  }"},
@@ -773,7 +773,7 @@ func Test_parseObject(t *testing.T) {
 			&model.AsjsonContext{JSON: `{"key":ok`},
 			model.AsjsonNAT,
 			0,
-			model.ParseInvalidValue,
+			model.ErrParseInvalidValue,
 		},
 	}
 	for _, tc := range tcs {
@@ -794,12 +794,12 @@ func Test_parseValue(t *testing.T) {
 		{
 			&model.AsjsonContext{JSON: ""},
 			model.AsjsonValue{N: 0, Typ: model.AsjsonNAT},
-			model.ParseExpectValue,
+			model.ErrParseExpectValue,
 		},
 		{
 			&model.AsjsonContext{JSON: "n"},
 			model.AsjsonValue{N: 0, Typ: model.AsjsonNAT},
-			model.ParseInvalidValue,
+			model.ErrParseInvalidValue,
 		},
 		{
 			&model.AsjsonContext{JSON: "null"},
@@ -809,7 +809,7 @@ func Test_parseValue(t *testing.T) {
 		{
 			&model.AsjsonContext{JSON: "abc"},
 			model.AsjsonValue{N: 0, Typ: model.AsjsonNAT},
-			model.ParseInvalidValue,
+			model.ErrParseInvalidValue,
 		},
 		{
 			&model.AsjsonContext{JSON: "true"},
@@ -824,7 +824,7 @@ func Test_parseValue(t *testing.T) {
 		{
 			&model.AsjsonContext{JSON: "fa"},
 			model.AsjsonValue{N: 0, Typ: model.AsjsonNAT},
-			model.ParseInvalidValue,
+			model.ErrParseInvalidValue,
 		},
 		{
 			&model.AsjsonContext{JSON: "1.2"},

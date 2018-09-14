@@ -2,7 +2,7 @@
  * @Author: Joey.Chen
  * @Date: 2018-09-10 08:25:11
  * @Last Modified by: Joey.Chen
- * @Last Modified time: 2018-09-11 00:41:14
+ * @Last Modified time: 2018-09-14 22:32:13
  */
 package parser
 
@@ -13,6 +13,7 @@ import (
 	"github.com/leobuzhi/asjson/model"
 )
 
+//Parse parse json to AsjsonValue return parse error
 func Parse(json string, av *model.AsjsonValue) error {
 	var ac model.AsjsonContext
 	ac.JSON = json
@@ -24,7 +25,7 @@ func Parse(json string, av *model.AsjsonValue) error {
 	parseWhitespace(&ac)
 	if len(ac.JSON) > 0 {
 		av.Typ = model.AsjsonNAT
-		return model.ParseRootNotSingular
+		return model.ErrParseRootNotSingular
 	}
 	return err
 }
@@ -43,7 +44,7 @@ func parseWhitespace(ac *model.AsjsonContext) {
 
 func parseNull(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 	if len(ac.JSON) < 4 || ac.JSON[0:4] != "null" {
-		return model.ParseInvalidValue
+		return model.ErrParseInvalidValue
 	}
 	ac.JSON = ac.JSON[4:]
 	av.Typ = model.AsjsonNULL
@@ -52,7 +53,7 @@ func parseNull(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 
 func parseTrue(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 	if len(ac.JSON) < 4 || ac.JSON[0:4] != "true" {
-		return model.ParseInvalidValue
+		return model.ErrParseInvalidValue
 	}
 	ac.JSON = ac.JSON[4:]
 	av.Typ = model.AsjsonTrue
@@ -61,7 +62,7 @@ func parseTrue(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 
 func parseFalse(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 	if len(ac.JSON) < 5 || ac.JSON[0:5] != "false" {
-		return model.ParseInvalidValue
+		return model.ErrParseInvalidValue
 	}
 	ac.JSON = ac.JSON[5:]
 	av.Typ = model.AsjsonFalse
@@ -71,7 +72,7 @@ func parseFalse(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 func parseNumber(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 	slen := len(ac.JSON)
 	if ac.JSON[slen-1] == '.' {
-		return model.ParseInvalidValue
+		return model.ErrParseInvalidValue
 	}
 
 	var i int
@@ -82,7 +83,7 @@ func parseNumber(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 		i++
 	} else {
 		if i < slen && !common.Isdigit1to9(ac.JSON[i]) {
-			return model.ParseInvalidValue
+			return model.ErrParseInvalidValue
 		}
 		for i++; i < slen && common.Isdigit(ac.JSON[i]); i++ {
 		}
@@ -91,7 +92,7 @@ func parseNumber(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 	if i < slen && ac.JSON[i] == '.' {
 		i++
 		if i < slen && !common.Isdigit(ac.JSON[i]) {
-			return model.ParseInvalidValue
+			return model.ErrParseInvalidValue
 		}
 		for i++; i < slen && common.Isdigit(ac.JSON[i]); i++ {
 		}
@@ -105,7 +106,7 @@ func parseNumber(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 				}
 			}
 			if i < slen && !common.Isdigit(ac.JSON[i]) {
-				return model.ParseInvalidValue
+				return model.ErrParseInvalidValue
 			}
 			for i++; i < slen && common.Isdigit(ac.JSON[i]); i++ {
 			}
@@ -113,7 +114,7 @@ func parseNumber(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 	}
 	n, err := strconv.ParseFloat(ac.JSON[0:i], 64)
 	if err != nil {
-		return model.ParseInvalidValue
+		return model.ErrParseInvalidValue
 	}
 	av.Typ = model.AsjsonNumber
 	av.N = n
@@ -125,7 +126,7 @@ func parseString(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 	slen := len(ac.JSON)
 
 	if slen < 2 || ac.JSON[0] != '"' {
-		return model.ParseMissQuotationMark
+		return model.ErrParseMissQuotationMark
 	}
 	var i int
 	for i = 1; i < len(ac.JSON); i++ {
@@ -143,7 +144,7 @@ func parseString(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 func parseArray(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 	alen := len(ac.JSON)
 	if alen < 2 || ac.JSON[0] != '[' {
-		return model.ParseMissOpenBracket
+		return model.ErrParseMissOpenBracket
 	}
 
 	curr := av
@@ -173,7 +174,7 @@ func parseArray(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 		len++
 
 		if ac.JSON == "" {
-			return model.ParseMissCloseBracket
+			return model.ErrParseMissCloseBracket
 		}
 
 		if ac.JSON[0] == ',' {
@@ -184,7 +185,7 @@ func parseArray(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 			av.Len = len
 			return nil
 		} else {
-			return model.ParseMissCommaOrCloseBracket
+			return model.ErrParseMissCommaOrCloseBracket
 		}
 	}
 }
@@ -192,7 +193,7 @@ func parseArray(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 func parseObject(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 	alen := len(ac.JSON)
 	if alen < 2 || ac.JSON[0] != '{' {
-		return model.ParseMissOpenBrace
+		return model.ErrParseMissOpenBrace
 	}
 
 	curr := av
@@ -218,7 +219,7 @@ func parseObject(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 		curr = curr.Next
 
 		if ac.JSON == "" || ac.JSON[0] != ':' {
-			return model.ParseMissColon
+			return model.ErrParseMissColon
 		}
 		ac.JSON = ac.JSON[1:]
 		parseWhitespace(ac)
@@ -235,7 +236,7 @@ func parseObject(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 		len += 2
 
 		if ac.JSON == "" {
-			return model.ParseMissCloseBrace
+			return model.ErrParseMissCloseBrace
 		}
 
 		if ac.JSON[0] == ',' {
@@ -246,14 +247,14 @@ func parseObject(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 			av.Len = len
 			return nil
 		} else {
-			return model.ParseMissCommaOrCloseBrace
+			return model.ErrParseMissCommaOrCloseBrace
 		}
 	}
 }
 
 func parseValue(ac *model.AsjsonContext, av *model.AsjsonValue) error {
 	if len(ac.JSON) == 0 {
-		return model.ParseExpectValue
+		return model.ErrParseExpectValue
 	}
 	switch ac.JSON[0] {
 	case 'n':
