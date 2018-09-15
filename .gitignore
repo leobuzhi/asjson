@@ -3,3 +3,8 @@
 .DS_Store
 
 asjson
+
+#benchmark
+torch.svg
+mem.prof
+asjson.test
