@@ -2,15 +2,15 @@
  * @Author: Joey.Chen
  * @Date: 2018-09-10 08:25:48
  * @Last Modified by: Joey.Chen
- * @Last Modified time: 2018-09-14 22:36:40
+ * @Last Modified time: 2018-09-15 00:26:53
  */
 package main
 
 import (
-	"bufio"
-	"bytes"
 	"flag"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"os"
 
 	"github.com/leobuzhi/asjson/api"
@@ -23,20 +23,17 @@ var min = flag.Bool("min", false, "minimize json")
 func main() {
 	flag.Parse()
 
-	s := bufio.NewScanner(os.Stdin)
 	var av model.AsjsonValue
 	var err error
-	var buf bytes.Buffer
 	var ret string
-	for s.Scan() {
-		_, err = buf.Write([]byte(s.Text()))
-		if err != nil {
-			fmt.Printf("write buffer err: %v\n", err)
-		}
-	}
-	err = parser.Parse(buf.String(), &av)
+
+	data, err := ioutil.ReadAll(os.Stdin)
 	if err != nil {
-		fmt.Printf("parse json err: %v\n", err)
+		log.Fatalf("err: %v\n", err)
+	}
+	err = parser.Parse(string(data), &av)
+	if err != nil {
+		log.Fatalf("parse json err: %v\n", err)
 	}
 	head := &av
 	if *min {
