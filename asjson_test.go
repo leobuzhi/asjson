@@ -2,7 +2,7 @@
  * @Author: Joey.Chen
  * @Date: 2018-09-10 08:25:48
  * @Last Modified by: Joey.Chen
- * @Last Modified time: 2018-09-15 00:24:31
+ * @Last Modified time: 2018-09-15 10:28:57
  */
 package main
 
@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_main(t *testing.T) {
+func TestMain(t *testing.T) {
 	tests := []struct {
 		name string
 		min  bool
@@ -35,5 +35,14 @@ func Test_main(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			main()
 		})
+	}
+}
+
+func BenchmarkMain(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		stdin, err := os.OpenFile("./testdata/testdata1.json", os.O_RDONLY, 0664)
+		os.Stdin = stdin
+		assert.Equal(b, nil, err)
+		main()
 	}
 }
