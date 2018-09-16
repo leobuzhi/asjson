@@ -26,6 +26,12 @@ echo '{"key1":  1,"key2":  "2"}' | asjson
 # }
 ```
 
+## Benchmark
+```sh
+go test -bench .
+#1000	   2167372 ns/op
+```
+
 ## Contributing
 Contributions are welcomed and greatly appreciated.
 

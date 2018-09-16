@@ -8,3 +8,6 @@ asjson
 torch.svg
 mem.prof
 asjson.test
+
+#coverage
+coverage.out

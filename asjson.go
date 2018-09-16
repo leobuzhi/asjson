@@ -2,7 +2,7 @@
  * @Author: Joey.Chen
  * @Date: 2018-09-10 08:25:48
  * @Last Modified by: Joey.Chen
- * @Last Modified time: 2018-09-15 00:26:53
+ * @Last Modified time: 2018-09-15 12:16:44
  */
 package main
 
@@ -12,13 +12,20 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"runtime"
+	"runtime/pprof"
 
 	"github.com/leobuzhi/asjson/api"
 	"github.com/leobuzhi/asjson/model"
 	"github.com/leobuzhi/asjson/parser"
 )
 
-var min = flag.Bool("min", false, "minimize json")
+var (
+	min = flag.Bool("min", false, "minimize json")
+	//for benchmark
+	memprofile = flag.String("memprofile", "", "write memory profile to `file`")
+	benchmark  bool
+)
 
 func main() {
 	flag.Parse()
@@ -42,4 +49,16 @@ func main() {
 		ret = api.StringBeautify(&head)
 	}
 	fmt.Println(ret)
+
+	if benchmark && *memprofile != "" {
+		f, err := os.Create(*memprofile)
+		if err != nil {
+			log.Fatal("could not create memory profile: ", err)
+		}
+		runtime.GC() // get up-to-date statistics
+		if err := pprof.WriteHeapProfile(f); err != nil {
+			log.Fatal("could not write memory profile: ", err)
+		}
+		f.Close()
+	}
 }

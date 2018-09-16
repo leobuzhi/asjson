@@ -2,34 +2,38 @@
  * @Author: Joey.Chen
  * @Date: 2018-09-10 08:25:29
  * @Last Modified by: Joey.Chen
- * @Last Modified time: 2018-09-14 22:21:10
+ * @Last Modified time: 2018-09-15 22:12:18
  */
 package api
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/leobuzhi/asjson/model"
 )
 
 func stringify(av **model.AsjsonValue, len int) string {
-	var ret string
+	//note(joey.chen): we ignore strings.Builder.WriteString err because it return a nil error.
+	var sb strings.Builder
 	switch (*av).Typ {
 	case model.AsjsonNULL:
-		ret = "null"
+		sb.WriteString("null")
 	case model.AsjsonFalse:
-		ret = "false"
+		sb.WriteString("false")
 	case model.AsjsonTrue:
-		ret = "true"
+		sb.WriteString("true")
 	//refefence(joey.chen):
 	//http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n2005.pdf
 	//https://golang.org/pkg/fmt/
 	case model.AsjsonNumber:
-		ret = fmt.Sprintf("%.17g", (*av).N)
+		sb.WriteString(fmt.Sprintf("%.17g", (*av).N))
 	case model.AsjsonString:
-		ret = fmt.Sprintf("\"%s\"", (*av).S)
+		sb.WriteString("\"")
+		sb.WriteString((*av).S)
+		sb.WriteString("\"")
 	case model.AsjsonArray:
-		ret += "["
+		sb.WriteString("[")
 		curr := *av
 		for i := 0; i < (*av).Len && curr != nil; i++ {
 			curr = (*curr).Next
@@ -37,17 +41,17 @@ func stringify(av **model.AsjsonValue, len int) string {
 			str := stringify(&curr, curr.Len)
 
 			if i != (*av).Len-1 {
-				ret += str + ","
+				sb.WriteString(str + ",")
 			} else {
-				ret += str
+				sb.WriteString(str)
 			}
 		}
 		if len == 0 {
-			ret += "]"
+			sb.WriteString("]")
 		}
 		*av = curr
 	case model.AsjsonObject:
-		ret += "{"
+		sb.WriteString("{")
 		curr := *av
 		for i := 0; i < (*av).Len && curr != nil; i++ {
 			curr = (*curr).Next
@@ -55,51 +59,58 @@ func stringify(av **model.AsjsonValue, len int) string {
 			str := stringify(&curr, curr.Len)
 
 			if len%2 == 1 {
-				ret += str + ":"
+				sb.WriteString(str + ":")
 			} else {
 				if i != (*av).Len-1 {
-					ret += str + ","
+					sb.WriteString(str + ",")
 				} else {
-					ret += str
+					sb.WriteString(str)
 				}
 			}
 
 		}
 		if len == 0 {
-			ret += "}"
+			sb.WriteString("}")
 		}
 		*av = curr
 	}
 
-	return ret
+	return sb.String()
 }
 
 func stringBeautify(av **model.AsjsonValue, len, dep int) string {
-	var ret string
+	var sb strings.Builder
 	switch (*av).Typ {
 	case model.AsjsonArray, model.AsjsonObject:
 	default:
 		for i := 0; i < dep; i++ {
-			ret += "  "
+			sb.WriteString("  ")
 		}
 	}
 
 	switch (*av).Typ {
 	case model.AsjsonNULL:
-		ret = "null"
+		sb.Reset()
+		sb.WriteString("null")
 	case model.AsjsonFalse:
-		ret = "false"
+		sb.Reset()
+		sb.WriteString("false")
 	case model.AsjsonTrue:
-		ret = "true"
+		sb.Reset()
+		sb.WriteString("true")
 	//refefence(joey.chen):
 	//http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n2005.pdf
 	//https://golang.org/pkg/fmt/
 	case model.AsjsonNumber:
-		ret = fmt.Sprintf("%.17g", (*av).N)
+		sb.Reset()
+		sb.WriteString(fmt.Sprintf("%.17g", (*av).N))
 	case model.AsjsonString:
-		ret = fmt.Sprintf("\"%s\"", (*av).S)
+		sb.Reset()
+		sb.WriteString("\"")
+		sb.WriteString((*av).S)
+		sb.WriteString("\"")
 	case model.AsjsonArray:
-		ret += "[\n"
+		sb.WriteString("[\n")
 		curr := *av
 		for i := 0; i < (*av).Len && curr != nil; i++ {
 			curr = (*curr).Next
@@ -107,23 +118,23 @@ func stringBeautify(av **model.AsjsonValue, len, dep int) string {
 			str := stringBeautify(&curr, curr.Len, dep+1)
 
 			for i := 0; i < dep; i++ {
-				ret += "  "
+				sb.WriteString("  ")
 			}
 			if i != (*av).Len-1 {
-				ret += fmt.Sprintf("%s,\n", str)
+				sb.WriteString(fmt.Sprintf("%s,\n", str))
 			} else {
-				ret += fmt.Sprintf("%s\n", str)
+				sb.WriteString(fmt.Sprintf("%s\n", str))
 			}
 		}
 		if len == 0 {
 			for i := 0; i < dep-1; i++ {
-				ret += "  "
+				sb.WriteString("  ")
 			}
-			ret += "]"
+			sb.WriteString("]")
 		}
 		*av = curr
 	case model.AsjsonObject:
-		ret += "{\n"
+		sb.WriteString("{\n")
 		curr := *av
 		for i := 0; i < (*av).Len && curr != nil; i++ {
 			curr = (*curr).Next
@@ -132,28 +143,31 @@ func stringBeautify(av **model.AsjsonValue, len, dep int) string {
 
 			if len%2 == 1 {
 				for i := 0; i < dep; i++ {
-					ret += "  "
+					sb.WriteString("  ")
 				}
-				ret += fmt.Sprintf("%s:", str)
+				sb.WriteString(str)
+				sb.WriteString(":")
 			} else {
 				if i != (*av).Len-1 {
-					ret += fmt.Sprintf("%s,\n", str)
+					sb.WriteString(str)
+					sb.WriteString(",\n")
 				} else {
-					ret += fmt.Sprintf("%s\n", str)
+					sb.WriteString(str)
+					sb.WriteString("\n")
 				}
 			}
 
 		}
 		if len == 0 {
 			for i := 0; i < dep-1; i++ {
-				ret += "  "
+				sb.WriteString("  ")
 			}
-			ret += "}"
+			sb.WriteString("}")
 		}
 		*av = curr
 	}
 
-	return ret
+	return sb.String()
 }
 
 //Stringify minimize json
